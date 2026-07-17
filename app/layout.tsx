@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: "Midnight Observatory — 3D Hourglass",
-    description: "Orbit, flip, pause, and calibrate a luminous 3D hourglass in a cinematic midnight observatory.",
+    description: "Orbit, flip, pause, and calibrate a luminous 3D hourglass, with a narrated history of the instrument.",
     openGraph: {
       title: "Midnight Observatory",
       description: "A 3D hourglass study in glass, brass, and amber sand.",

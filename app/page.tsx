@@ -249,6 +249,31 @@ export default function Home() {
             <div className="range-scale"><span>0.25×</span><span>1.00×</span><span>2.00×</span></div>
           </div>
 
+          <section className="history-audio-card" aria-labelledby="history-audio-title">
+            <div className="audio-heading">
+              <span>03 / Audio archive</span>
+              <b>00:28</b>
+            </div>
+            <h2 id="history-audio-title">A brief history of the hourglass</h2>
+            <p>From a medieval fresco to the decks of sailing ships.</p>
+            <audio controls preload="metadata" src="/hourglass-history.mp3">
+              Your browser does not support audio playback. <a href="/hourglass-history.mp3">Download the MP3</a>.
+            </audio>
+            <div className="audio-actions">
+              <span>AI narration / MP3</span>
+              <a href="/hourglass-history.mp3" download>Download ↓</a>
+            </div>
+            <details>
+              <summary>Read transcript <span>+</span></summary>
+              <p>
+                Hourglasses have no certain inventor. The earliest clear European evidence is Ambrogio Lorenzetti’s 1338 fresco in Siena. By the late fourteenth century, sandglasses appeared in ship inventories. Their steady flow worked well on a moving deck, so sailors used them to time watches and help estimate speed. On land, they timed sermons, cooking, and work. Today, the hourglass survives less as a precision clock than as a symbol of time passing.
+              </p>
+              <div className="history-sources">
+                Sources: <a href="https://www.guinnessworldrecords.com/world-records/first-hourglass" target="_blank" rel="noreferrer">early evidence</a> · <a href="https://www.rmg.co.uk/collections/objects/rmgc-object-10272" target="_blank" rel="noreferrer">maritime use</a>
+              </div>
+            </details>
+          </section>
+
           <div className="display-controls">
             <span>Model overlays</span>
             <button

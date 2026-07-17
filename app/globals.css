@@ -320,6 +320,30 @@ input[type="range"]::-webkit-slider-thumb { appearance: none; width: 15px; heigh
 input[type="range"]::-moz-range-thumb { width: 15px; height: 15px; border: 1px solid var(--brass-light); border-radius: 50%; background: var(--brass-light); }
 .range-scale { display: flex; justify-content: space-between; color: rgba(238,232,220,.35); font: 500 6px/1 var(--font-geist-mono), monospace; margin-top: 7px; }
 
+.history-audio-card {
+  margin: 17px 0 0;
+  padding: 15px 0 17px;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+.audio-heading { display: flex; align-items: center; justify-content: space-between; color: var(--brass-light); text-transform: uppercase; letter-spacing: .15em; font-size: 7px; }
+.audio-heading b { color: var(--muted); font: 500 7px/1 var(--font-geist-mono), monospace; }
+.history-audio-card h2 { margin: 12px 0 5px; max-width: 220px; font: 400 16px/1.18 Georgia, serif; letter-spacing: .01em; }
+.history-audio-card > p { margin: 0 0 12px; color: var(--muted); font: 400 9px/1.45 Georgia, serif; }
+.history-audio-card audio { display: block; width: 100%; height: 32px; color-scheme: dark; filter: sepia(.18) saturate(.85) brightness(.88); }
+.audio-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 9px; color: rgba(238,232,220,.35); text-transform: uppercase; letter-spacing: .11em; font-size: 6px; }
+.audio-actions a { color: var(--brass-light); text-decoration: none; }
+.audio-actions a:hover { color: var(--sand); }
+.history-audio-card details { margin-top: 12px; border-top: 1px solid rgba(238,232,220,.08); }
+.history-audio-card summary { padding: 11px 0 0; display: flex; align-items: center; justify-content: space-between; color: #aaa59a; text-transform: uppercase; letter-spacing: .12em; font-size: 7px; cursor: pointer; list-style: none; }
+.history-audio-card summary::-webkit-details-marker { display: none; }
+.history-audio-card summary span { color: var(--sand); font-size: 12px; transition: transform .2s ease; }
+.history-audio-card details[open] summary span { transform: rotate(45deg); }
+.history-audio-card details > p { margin: 11px 0 0; color: #aaa59a; font: 400 10px/1.55 Georgia, serif; }
+.history-sources { margin-top: 10px; color: #68665f; font-size: 6px; line-height: 1.5; text-transform: uppercase; letter-spacing: .08em; }
+.history-sources a { color: #9f947f; text-underline-offset: 2px; }
+.history-sources a:hover { color: var(--brass-light); }
+
 .display-controls { padding: 18px 0 13px; border-bottom: 1px solid var(--hairline); }
 .display-controls > span, .model-card > span, .shortcut-card > span { display: block; color: var(--muted); font-size: 7px; text-transform: uppercase; letter-spacing: .16em; margin-bottom: 10px; }
 .display-controls button { width: 100%; border: 0; background: transparent; padding: 7px 0; display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer; }
@@ -368,8 +392,10 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 1px solid 
   .controls-panel .panel-heading, .controls-panel .model-card, .controls-panel .shortcut-card { display: none; }
   .flip-button { margin: 0; min-height: 62px; }
   .button-pair { min-height: 62px; }
-  .speed-control, .display-controls { grid-column: 1 / -1; }
+  .speed-control, .history-audio-card, .display-controls { grid-column: 1 / -1; }
   .speed-control { padding: 14px 2px 5px; }
+  .history-audio-card { margin-top: 4px; padding: 15px 2px; }
+  .history-audio-card h2 { max-width: none; }
   .display-controls { display: grid; grid-template-columns: auto 1fr 1fr; align-items: center; gap: 10px; padding: 10px 0 2px; border: 0; }
   .display-controls > span { margin: 0 8px 0 0; }
   .mobile-readout { display: flex; position: absolute; left: 18px; right: 18px; top: 53px; z-index: 8; justify-content: space-between; align-items: center; color: var(--muted); text-transform: uppercase; letter-spacing: .14em; font-size: 7px; pointer-events: none; }
@@ -388,7 +414,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 1px solid 
   .render-specs { display: none; }
   .render-badge { top: 14px; right: 14px; }
   .controls-panel { grid-template-columns: 1fr; }
-  .button-pair, .speed-control, .display-controls { grid-column: 1; }
+  .button-pair, .speed-control, .history-audio-card, .display-controls { grid-column: 1; }
   .display-controls { grid-template-columns: 1fr 1fr; }
   .display-controls > span { grid-column: 1 / -1; }
   .stage-caption { display: none; }
