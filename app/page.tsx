@@ -1,11 +1,9 @@
 "use client";
 
-import { CSSProperties, KeyboardEvent, PointerEvent, useEffect, useRef, useState } from "react";
+import { CSSProperties, KeyboardEvent, useEffect, useState } from "react";
+import { HourglassScene } from "./HourglassScene";
 
 const DURATION_SECONDS = 60;
-const GRAINS = Array.from({ length: 18 }, (_, index) => index);
-
-type Rotation = { x: number; y: number };
 
 function formatTime(seconds: number) {
   const safe = Math.max(0, Math.ceil(seconds));
@@ -16,9 +14,10 @@ export default function Home() {
   const [sandUpper, setSandUpper] = useState(1);
   const [speed, setSpeed] = useState(1);
   const [running, setRunning] = useState(true);
-  const [rotation, setRotation] = useState<Rotation>({ x: -4, y: 10 });
   const [isFlipping, setIsFlipping] = useState(false);
-  const drag = useRef<{ id: number; x: number; y: number; rotation: Rotation } | null>(null);
+  const [showTrails, setShowTrails] = useState(true);
+  const [showMesh, setShowMesh] = useState(false);
+  const [resetSignal, setResetSignal] = useState(0);
 
   useEffect(() => {
     if (!running || isFlipping || sandUpper <= 0) return;
@@ -42,7 +41,13 @@ export default function Home() {
 
   const remainingAtSpeed = (sandUpper * DURATION_SECONDS) / speed;
   const lowerAmount = 1 - sandUpper;
-  const status = isFlipping ? "Reversing field" : sandUpper <= 0 ? "Transfer complete" : running ? "Flow nominal" : "Flow suspended";
+  const status = isFlipping
+    ? "Reversing gravity"
+    : sandUpper <= 0
+      ? "Transfer complete"
+      : running
+        ? "Physics live"
+        : "Simulation paused";
 
   const flip = () => {
     if (isFlipping) return;
@@ -59,9 +64,9 @@ export default function Home() {
   const reset = () => {
     setSandUpper(1);
     setSpeed(1);
-    setRotation({ x: -4, y: 10 });
     setIsFlipping(false);
     setRunning(true);
+    setResetSignal((value) => value + 1);
   };
 
   const toggleRunning = () => {
@@ -73,39 +78,7 @@ export default function Home() {
     setRunning((value) => !value);
   };
 
-  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current = {
-      id: event.pointerId,
-      x: event.clientX,
-      y: event.clientY,
-      rotation,
-    };
-  };
-
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!drag.current || drag.current.id !== event.pointerId) return;
-    const dx = event.clientX - drag.current.x;
-    const dy = event.clientY - drag.current.y;
-    setRotation({
-      x: Math.max(-24, Math.min(24, drag.current.rotation.x - dy * 0.16)),
-      y: drag.current.rotation.y + dx * 0.2,
-    });
-  };
-
-  const releasePointer = (event: PointerEvent<HTMLDivElement>) => {
-    if (drag.current?.id === event.pointerId) drag.current = null;
-  };
-
   const handleStageKey = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-      event.preventDefault();
-      setRotation((value) => ({ ...value, y: value.y + (event.key === "ArrowLeft" ? -8 : 8) }));
-    }
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      event.preventDefault();
-      setRotation((value) => ({ ...value, x: Math.max(-24, Math.min(24, value.x + (event.key === "ArrowUp" ? 5 : -5))) }));
-    }
     if (event.key.toLowerCase() === "f") flip();
     if (event.key.toLowerCase() === "r") reset();
     if (event.key === " ") {
@@ -113,14 +86,6 @@ export default function Home() {
       toggleRunning();
     }
   };
-
-  const modelStyle = {
-    "--rot-x": `${rotation.x}deg`,
-    "--rot-y": `${rotation.y}deg`,
-    "--upper-fill": `${Math.max(0, sandUpper * 70)}%`,
-    "--lower-fill": `${Math.max(0, lowerAmount * 72)}%`,
-    "--flow-speed": `${1 / speed}s`,
-  } as CSSProperties;
 
   return (
     <main className="observatory-shell">
@@ -134,7 +99,7 @@ export default function Home() {
         </div>
         <div className="topbar-center" aria-hidden="true">
           <span />
-          HG–01 / GRAVITY STUDY
+          HG–02 / GRANULAR DYNAMICS
           <span />
         </div>
         <div className={`system-chip ${running ? "is-live" : ""}`}>
@@ -147,13 +112,13 @@ export default function Home() {
         <aside className="instrument-panel telemetry-panel" aria-label="Hourglass telemetry">
           <div className="panel-heading">
             <span>01</span>
-            <p>Flow telemetry</p>
+            <p>Particle telemetry</p>
           </div>
 
           <div className="primary-readout">
             <span>Time remaining</span>
             <strong>{formatTime(remainingAtSpeed)}</strong>
-            <small>MM : SS</small>
+            <small>MM : SS / SIMULATED</small>
           </div>
 
           <dl className="telemetry-grid">
@@ -175,80 +140,66 @@ export default function Home() {
             </div>
           </dl>
 
+          <div className="solver-card">
+            <div><span>Particle solver</span><b>STABLE</b></div>
+            <ul>
+              <li><span>Dynamic grains</span><b>240</b></li>
+              <li><span>Reservoir field</span><b>3,600</b></li>
+              <li><span>Collision model</span><b>CONE / RADIAL</b></li>
+              <li><span>Integrator</span><b>SEMI-IMPLICIT</b></li>
+            </ul>
+          </div>
+
           <div className="field-graph" aria-hidden="true">
-            <div className="graph-label"><span>Granular field</span><b>LIVE</b></div>
+            <div className="graph-label"><span>Collision energy</span><b>{running ? "LIVE" : "HOLD"}</b></div>
             <div className="graph-lines">
-              {Array.from({ length: 17 }, (_, index) => <i key={index} style={{ height: `${20 + ((index * 17) % 52)}%` }} />)}
+              {Array.from({ length: 21 }, (_, index) => (
+                <i key={index} style={{ height: `${18 + ((index * 23 + Math.round(lowerAmount * 19)) % 62)}%` }} />
+              ))}
             </div>
-            <div className="graph-axis"><span>−30s</span><span>NOW</span></div>
+            <div className="graph-axis"><span>−12s</span><span>NOW</span></div>
           </div>
 
           <p className="object-note">
-            <span>Object note / 7B</span>
-            A calibrated vessel for observing time as matter: measured, reversible, and always in motion.
+            <span>Model note / HG–02</span>
+            A procedural 3D instrument built from lathed optical glass, machined brass, and thousands of simulated amber grains.
           </p>
         </aside>
 
         <section className="stage-column" aria-label="Interactive hourglass simulation">
-          <div className="stage-kicker"><span>Drag to orbit</span><i /><span>Arrow keys supported</span></div>
+          <div className="stage-kicker">
+            <span>Drag to orbit</span><i /><span>Scroll to zoom</span><i /><span>Real-time WebGL</span>
+          </div>
           <div
             className="hourglass-stage"
             role="application"
-            aria-label="Interactive 3D hourglass. Drag to rotate. Press F to flip, space to pause, or R to reset."
+            aria-label="Interactive 3D hourglass. Drag to orbit, scroll to zoom, press F to flip, space to pause, or R to reset."
             tabIndex={0}
             onKeyDown={handleStageKey}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={releasePointer}
-            onPointerCancel={releasePointer}
           >
             <div className="orbit orbit-one" aria-hidden="true" />
             <div className="orbit orbit-two" aria-hidden="true" />
             <div className="axis-line" aria-hidden="true"><span>N</span><span>S</span></div>
 
-            <div className="model-perspective" style={modelStyle}>
-              <div className="drag-shell">
-                <div className={`hourglass-object ${isFlipping ? "is-flipping" : ""}`}>
-                  <div className="plate plate-top"><i /><b /></div>
-                  <div className="plate plate-bottom"><i /><b /></div>
-                  <div className="post post-left-back"><i /></div>
-                  <div className="post post-right-back"><i /></div>
+            <HourglassScene
+              sandUpper={sandUpper}
+              speed={speed}
+              running={running}
+              isFlipping={isFlipping}
+              showTrails={showTrails}
+              showMesh={showMesh}
+              resetSignal={resetSignal}
+            />
 
-                  <div className="glass-vessel" aria-hidden="true">
-                    <div className="glass-half glass-upper">
-                      <div className="glass-sheen" />
-                      <div className="sand-reservoir sand-upper"><i /></div>
-                    </div>
-                    <div className="glass-neck" />
-                    <div className="glass-half glass-lower">
-                      <div className="glass-sheen" />
-                      <div className="sand-reservoir sand-lower"><i /></div>
-                    </div>
-                    <div className={`sand-stream ${running && !isFlipping && sandUpper > 0 ? "is-flowing" : ""}`} />
-                    <div className={`grain-field ${running && !isFlipping && sandUpper > 0 ? "is-flowing" : ""}`}>
-                      {GRAINS.map((grain) => (
-                        <i
-                          key={grain}
-                          style={{
-                            left: `${47 + ((grain * 7) % 8)}%`,
-                            animationDelay: `${(grain * 0.071) % 0.9}s`,
-                            animationDuration: `${0.7 + (grain % 5) * 0.08}s`,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="post post-left-front"><i /></div>
-                  <div className="post post-right-front"><i /></div>
-                </div>
-              </div>
+            <div className="render-specs" aria-hidden="true">
+              <span>PBR GLASS</span><i />
+              <span>SOFT SHADOWS</span><i />
+              <span>ACES TONE MAP</span>
             </div>
-
             <div className="stage-caption" aria-hidden="true">
-              <span>− {Math.round(rotation.y)}° AZ</span>
+              <span>FREE ORBIT</span>
               <i />
-              <span>{Math.round(rotation.x)}° EL</span>
+              <span>OPTICAL MODEL / 96 SEG</span>
             </div>
           </div>
 
@@ -261,12 +212,12 @@ export default function Home() {
         <aside className="instrument-panel controls-panel" aria-label="Simulation controls">
           <div className="panel-heading">
             <span>02</span>
-            <p>Instrument control</p>
+            <p>Simulation control</p>
           </div>
 
           <button className="flip-button" type="button" onClick={flip} disabled={isFlipping}>
             <span className="flip-icon" aria-hidden="true">↕</span>
-            <span><b>{isFlipping ? "Reversing" : "Flip hourglass"}</b><small>F key</small></span>
+            <span><b>{isFlipping ? "Reversing gravity" : "Flip hourglass"}</b><small>900 ms physical turn / F key</small></span>
           </button>
 
           <div className="button-pair">
@@ -276,13 +227,13 @@ export default function Home() {
             </button>
             <button type="button" onClick={reset}>
               <span aria-hidden="true">↺</span>
-              <b>Reset</b>
+              <b>Reset view</b>
             </button>
           </div>
 
           <div className="speed-control">
             <div className="control-label">
-              <label htmlFor="flow-speed">Flow velocity</label>
+              <label htmlFor="flow-speed">Simulation velocity</label>
               <output htmlFor="flow-speed">{speed.toFixed(2)}×</output>
             </div>
             <input
@@ -298,17 +249,39 @@ export default function Home() {
             <div className="range-scale"><span>0.25×</span><span>1.00×</span><span>2.00×</span></div>
           </div>
 
-          <div className="material-card">
-            <span>Instrument composition</span>
-            <div><i className="swatch glass" /><p><b>Borosilicate</b><small>Optical vessel</small></p></div>
-            <div><i className="swatch brass" /><p><b>Aged brass</b><small>Structural frame</small></p></div>
-            <div><i className="swatch amber" /><p><b>Silica / amber</b><small>Calibrated medium</small></p></div>
+          <div className="display-controls">
+            <span>Model overlays</span>
+            <button
+              type="button"
+              className={showTrails ? "is-active" : ""}
+              aria-pressed={showTrails}
+              onClick={() => setShowTrails((value) => !value)}
+            >
+              <i />
+              <span><b>Velocity trails</b><small>Particle trajectory field</small></span>
+            </button>
+            <button
+              type="button"
+              className={showMesh ? "is-active" : ""}
+              aria-pressed={showMesh}
+              onClick={() => setShowMesh((value) => !value)}
+            >
+              <i />
+              <span><b>Glass topology</b><small>Reveal procedural mesh</small></span>
+            </button>
+          </div>
+
+          <div className="model-card">
+            <span>3D model / HG–02</span>
+            <div><b>Procedural lathe</b><small>96 radial segments</small></div>
+            <div><b>Physical glass</b><small>IOR 1.46 / transmission 1.0</small></div>
+            <div><b>Machined frame</b><small>Brass PBR / 4 supports</small></div>
+            <a href="/midnight-hourglass.glb" download>Download GLB model <span>↓</span></a>
           </div>
 
           <div className="shortcut-card">
             <span>Keyboard</span>
-            <p><kbd>F</kbd> Flip <kbd>Space</kbd> Pause</p>
-            <p><kbd>R</kbd> Reset <kbd>←</kbd><kbd>→</kbd> Orbit</p>
+            <p><kbd>F</kbd> Flip <kbd>Space</kbd> Pause <kbd>R</kbd> Reset</p>
           </div>
         </aside>
       </div>
